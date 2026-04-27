@@ -1,0 +1,7 @@
+{
+  "funds": {
+    "000001": "基金名称A",
+    "000002": "基金名称B"
+  },
+  "serverchan_key": "你的Server酱SendKey"
+}

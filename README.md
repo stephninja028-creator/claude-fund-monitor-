@@ -1,6 +1,6 @@
-# 📊 claude-fund-monitor
+# fund-rebalance-monitor
 
-**基金调仓监控 Agent** — 自动监控你持有的基金十大持仓变化，有调仓立即推送微信通知。
+**基金调仓监控** — 自动监控你持有的基金十大持仓变化，有调仓立即推送微信通知。
 
 > 支付宝买基金，基金经理偷偷调仓你不知道？这个工具帮你盯着。
 
@@ -11,8 +11,7 @@
 - 监控任意数量的 A 股 / QDII 基金
 - 每天自动检查十大重仓股票代码变化
 - **只在发现调仓时推送微信通知**，无变动静默
-- 支持随时手动触发检查
-- 支持查看当前持仓快照
+- 命令行管理基金列表，无需改代码
 
 ---
 
@@ -36,31 +35,61 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/stephninja028-creator/claude-fund-monitor-
-cd claude-fund-monitor-
+git clone https://github.com/stephninja028-creator/fund-rebalance-monitor
+cd fund-rebalance-monitor
 
-# 2. 运行初始化向导
-python3 scripts/setup.py
+# 2. 安装依赖
+pip3 install requests
+
+# 3. 初始化配置
+cp config.example.json config.json
+# 编辑 config.json，填入你的基金代码和 SendKey
 ```
 
-初始化向导会引导你：
-- 输入基金代码和名称
-- 输入 Server酱 SendKey
-- 自动设置每天定时运行（cron）
+---
+
+## 配置
+
+编辑 `config.json`：
+
+```json
+{
+  "funds": {
+    "000001": "基金名称A",
+    "000002": "基金名称B"
+  },
+  "serverchan_key": "你的SendKey"
+}
+```
 
 ---
 
 ## 使用
 
 ```bash
-# 初始化（只需运行一次）
-python3 scripts/setup.py
+# 查看当前监控的基金列表
+python3 fund_monitor.py --list
+
+# 添加基金
+python3 fund_monitor.py --add 000001 "基金名称"
+
+# 删除基金
+python3 fund_monitor.py --remove 000001
 
 # 手动立即检查一次
-python3 scripts/monitor.py
+python3 fund_monitor.py
+```
 
-# 查看当前监控的基金持仓快照
-python3 scripts/snapshot.py
+---
+
+## 设置每日自动运行
+
+```bash
+# 打开 cron 编辑器
+crontab -e
+
+# 添加以下一行（每天 09:00 运行）
+0 9 * * * /usr/bin/python3 /你的路径/fund_monitor.py >> /你的路径/monitor.log 2>&1
 ```
 
 ---
@@ -73,17 +102,17 @@ python3 scripts/snapshot.py
 基金调仓监控  2026-04-25 09:00
 监控基金数量：5
 ====================================================
-  [016858] 国金量化多因子股票C  → 无变动
-  [000043] 嘉实美国成长股票     → 无变动
+  [000001] 基金名称A  → 无变动
+  [000002] 基金名称B  → 无变动
   ...
 ✅ 所有基金无调仓，不推送。
 ```
 
 **发现调仓时（推送微信）：**
 ```
-  [016858] 国金量化多因子股票C
-    → ➕ 新进：6885251, 3003940
-    → ➖ 移出：0007920, 6000101
+  [000001] 基金名称A
+    → ➕ 新进：XXXXXXX, XXXXXXX
+    → ➖ 移出：XXXXXXX, XXXXXXX
 ✅ 微信推送成功
 ```
 
@@ -91,9 +120,9 @@ python3 scripts/snapshot.py
 
 > **基金调仓提醒 · 1 只 · 2026-04-25**
 >
-> **国金量化多因子股票C**
-> - ➕ 新进：6885251, 3003940
-> - ➖ 移出：0007920, 6000101
+> **基金名称A**
+> - ➕ 新进：XXXXXXX, XXXXXXX
+> - ➖ 移出：XXXXXXX, XXXXXXX
 
 ---
 
@@ -109,21 +138,19 @@ python3 scripts/snapshot.py
 
 - macOS 或 Linux
 - Python 3.8+
-- `requests`（初始化时自动安装）
+- `requests` 库
 
 ---
 
 ## 文件说明
 
 ```
-claude-fund-monitor-/
-├── scripts/
-│   ├── setup.py      # 初始化配置向导
-│   ├── monitor.py    # 主监控脚本（每天自动运行）
-│   └── snapshot.py   # 查看当前持仓快照
-├── config.json       # 你的配置（自动生成，不会上传 GitHub）
-├── fund_state.json   # 持仓状态存档（自动生成）
-└── monitor.log       # 运行日志（自动生成）
+fund-rebalance-monitor/
+├── fund_monitor.py       # 主脚本
+├── config.json           # 你的配置（不会上传 GitHub）
+├── config.example.json   # 配置模板
+├── fund_state.json       # 持仓状态存档（自动生成）
+└── monitor.log           # 运行日志（自动生成）
 ```
 
 ---
